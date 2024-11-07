@@ -3,6 +3,7 @@
 #include <WebServer.h>
 #define CAMERA_MODEL_AI_THINKER // Has PSRAM
 #include "camera_pins.h"
+//#define BUTTON 5
 // Replace with your network credentials
 const char* ssid = "Network";
 const char* password = "qwertyui";
@@ -30,6 +31,26 @@ void handleCapture() {
   esp_camera_fb_return(fb);
   digitalWrite(FLASH_LED_PIN, LOW);
 }
+
+// bool button_pressed = false;
+
+// void getButtonStatus() {
+//     // Check if button is pressed (LOW)
+//     if (digitalRead(BUTTON) == LOW && !button_pressed) {
+//         delay(50);  // Debounce delay
+//         if (digitalRead(BUTTON) == LOW) {  // Confirm button press
+//             button_pressed = true;  // Set flag to prevent repeated triggers
+//             server.send(200, "text/plain", "pressed");
+//             return;
+//         }
+//     } else if (digitalRead(BUTTON) == HIGH && button_pressed) {
+//         // Reset the flag when the button is released
+//         button_pressed = false;
+//     }
+//     server.send(200, "text/plain", "not pressed");
+// }
+
+
 void setup() {
   Serial.begin(115200);
   Serial.println();
@@ -56,10 +77,10 @@ void setup() {
   config.frame_size = FRAMESIZE_HD;
   config.pixel_format = PIXFORMAT_JPEG;
   config.fb_location = CAMERA_FB_IN_PSRAM;
-  config.jpeg_quality = 5;
+  config.jpeg_quality = 2;
   config.fb_count = 1;
   if (psramFound()) {
-    config.jpeg_quality = 5;
+    config.jpeg_quality = 2;
     config.fb_count = 2;
     config.grab_mode = CAMERA_GRAB_LATEST;
   } else {
@@ -91,8 +112,10 @@ void setup() {
   // Initialize flash pin as output
   pinMode(FLASH_LED_PIN, OUTPUT);
   digitalWrite(FLASH_LED_PIN, LOW); // Make sure flash is off initially
+  //pinMode(BUTTON, INPUT_PULLUP);
   // Set up web server
   server.on("/capture", handleCapture);
+  //server.on("/getButtonStatus", getButtonStatus);
   server.begin();
   Serial.print("Camera Ready! Access http://");
   Serial.print(WiFi.localIP());

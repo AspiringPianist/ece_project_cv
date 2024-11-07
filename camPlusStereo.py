@@ -20,32 +20,38 @@ from io import BytesIO
 from ocr import run_ocr
 import os
 
-ESP32_IP = "192.168.144.225"
+ESP32CAM_IP = "192.168.144.225"
+ESP32_IP = "192.168.144.89"
+last_button_status = None  # Add this outside the function
+
 def capture_and_process_image():
-    # Capture image from ESP32-CAM
-    capture_url = f"http://{ESP32_IP}/capture"
-    response = requests.get(capture_url)
-    
-    # Save captured image temporarily
-    temp_image_path = "temp_capture.jpg"
-    with open(temp_image_path, "wb") as f:
-        f.write(response.content)
-    
-    Image.open(temp_image_path).show()
-    # Run OCR using PaddleOCR
-    detected_text = run_ocr(temp_image_path)
-    
-    # Clean up temporary file
-    # os.remove(temp_image_path)
-    
-    # Initialize text-to-speech engine
-    engine = pyttsx3.init()
-    
-    # Print and speak the detected text
-    print("Detected text:", detected_text)
-    for text in detected_text:
-        engine.say(text)
-        engine.runAndWait()
+    try:
+        # Capture image from ESP32-CAM
+        capture_url = f"http://{ESP32CAM_IP}/capture"
+        response = requests.get(capture_url)
+        # Save captured image temporarily
+        temp_image_path = "temp_capture.jpg"
+        with open(temp_image_path, "wb") as f:
+            f.write(response.content)
+        Image.open(temp_image_path).show()
+        # Run OCR using PaddleOCR
+        detected_text = run_ocr(temp_image_path)
+        if detected_text:
+            engine = pyttsx3.init()
+            # Clean up temporary file
+            # os.remove(temp_image_path)
+            # Initialize text-to-speech engine
+            # Print and speak the detected text
+            print("Detected text:", detected_text)
+            if(detected_text):
+                engine.say(detected_text)
+                engine.runAndWait()
+        else:
+            return
+    except requests.exceptions.RequestException as e:
+        print(f"Error capturing image: {e}")
+    except Exception as e:
+        print(f"Unexpected error: {e}")
         
 # Initialize Flask app
 app = Flask(__name__)
@@ -242,17 +248,32 @@ def clear_plot():
     plt.clf()
     return "Plot cleared", 200
 
-@app.route('/ocr_button', methods=['POST'])
-def ocr_button():
-    # Capture image and process
-    capture_and_process_image()
-    return "Image processed", 200
+last_button_status = "not pressed"  # Initialize the last status
+
+def check_button_status():
+    global last_button_status
+    while True:
+        try:
+            response = requests.get(f"http://{ESP32_IP}/getButtonStatus")
+            if response.status_code == 200:
+                button_status = response.text.strip()
+                # Only capture if the button status has just changed to "pressed"
+                if button_status == "pressed" and last_button_status == "not pressed":
+                    print('Button Pressed')
+                    capture_and_process_image()
+                # Update the last known status
+                last_button_status = button_status
+        except requests.exceptions.RequestException:
+            print("Error connecting to ESP32")
+        time.sleep(0.5)  # Delay to prevent excessive requests
+
 
 if __name__ == '__main__':
     # Start visualization thread
     viz_thread = threading.Thread(target=visualization_thread, daemon=True)
     viz_thread.start()
-    
+    button_thread = threading.Thread(target=check_button_status, daemon=True)
+    button_thread.start()
     PORT = 4443
     print("\nServer IP Addresses:")
     print("-" * 50)

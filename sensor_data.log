@@ -1,0 +1,50 @@
+2024-11-08 02:03:12,857 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:4443
+ * Running on http://192.168.144.4:4443
+2024-11-08 02:03:12,859 - INFO - [33mPress CTRL+C to quit[0m
+2024-11-08 02:05:07,927 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:4443
+ * Running on http://192.168.144.4:4443
+2024-11-08 02:05:07,929 - INFO - [33mPress CTRL+C to quit[0m
+2024-11-08 02:05:16,102 - INFO - Imported existing <module 'comtypes.gen' from 'C:\\Users\\Unnath Ch\\AppData\\Local\\Programs\\Python\\Python311\\Lib\\site-packages\\comtypes\\gen\\__init__.py'>
+2024-11-08 02:05:16,103 - INFO - Using writeable comtypes cache directory: 'C:\Users\Unnath Ch\AppData\Local\Programs\Python\Python311\Lib\site-packages\comtypes\gen'
+2024-11-08 02:05:53,189 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:4443
+ * Running on http://192.168.144.4:4443
+2024-11-08 02:05:53,190 - INFO - [33mPress CTRL+C to quit[0m
+2024-11-08 02:05:58,276 - INFO - Imported existing <module 'comtypes.gen' from 'C:\\Users\\Unnath Ch\\AppData\\Local\\Programs\\Python\\Python311\\Lib\\site-packages\\comtypes\\gen\\__init__.py'>
+2024-11-08 02:05:58,278 - INFO - Using writeable comtypes cache directory: 'C:\Users\Unnath Ch\AppData\Local\Programs\Python\Python311\Lib\site-packages\comtypes\gen'
+2024-11-08 02:09:01,737 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:4443
+ * Running on http://192.168.144.4:4443
+2024-11-08 02:09:01,738 - INFO - [33mPress CTRL+C to quit[0m
+2024-11-08 02:09:16,398 - INFO - Imported existing <module 'comtypes.gen' from 'C:\\Users\\Unnath Ch\\AppData\\Local\\Programs\\Python\\Python311\\Lib\\site-packages\\comtypes\\gen\\__init__.py'>
+2024-11-08 02:09:16,399 - INFO - Using writeable comtypes cache directory: 'C:\Users\Unnath Ch\AppData\Local\Programs\Python\Python311\Lib\site-packages\comtypes\gen'
+2024-11-08 02:09:32,381 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:4443
+ * Running on http://192.168.144.4:4443
+2024-11-08 02:09:32,382 - INFO - [33mPress CTRL+C to quit[0m
+2024-11-08 02:09:42,629 - INFO - Imported existing <module 'comtypes.gen' from 'C:\\Users\\Unnath Ch\\AppData\\Local\\Programs\\Python\\Python311\\Lib\\site-packages\\comtypes\\gen\\__init__.py'>
+2024-11-08 02:09:42,630 - INFO - Using writeable comtypes cache directory: 'C:\Users\Unnath Ch\AppData\Local\Programs\Python\Python311\Lib\site-packages\comtypes\gen'
+2024-11-08 02:10:47,155 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:4443
+ * Running on http://192.168.144.4:4443
+2024-11-08 02:10:47,157 - INFO - [33mPress CTRL+C to quit[0m
+2024-11-08 02:12:01,726 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:4443
+ * Running on http://192.168.144.4:4443
+2024-11-08 02:12:01,727 - INFO - [33mPress CTRL+C to quit[0m
+2024-11-08 02:13:18,348 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:4443
+ * Running on http://192.168.144.4:4443
+2024-11-08 02:13:18,350 - INFO - [33mPress CTRL+C to quit[0m
+2024-11-08 02:14:32,645 - INFO - Imported existing <module 'comtypes.gen' from 'C:\\Users\\Unnath Ch\\AppData\\Local\\Programs\\Python\\Python311\\Lib\\site-packages\\comtypes\\gen\\__init__.py'>
+2024-11-08 02:14:32,646 - INFO - Using writeable comtypes cache directory: 'C:\Users\Unnath Ch\AppData\Local\Programs\Python\Python311\Lib\site-packages\comtypes\gen'

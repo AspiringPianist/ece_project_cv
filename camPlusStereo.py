@@ -20,6 +20,7 @@ from io import BytesIO
 from ocr import run_ocr
 import os
 
+ESP32_IP = "192.168.144.225"
 def capture_and_process_image():
     # Capture image from ESP32-CAM
     capture_url = f"http://{ESP32_IP}/capture"

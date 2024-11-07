@@ -1,13 +1,25 @@
 #include "esp_camera.h"
 #include <WiFi.h>
 #include <WebServer.h>
+#include <HTTPClient.h> //REVIEW
 
 #define CAMERA_MODEL_AI_THINKER // Has PSRAM
 #include "camera_pins.h"
 
+//REVIEW
+// Add these with other defines
+#define BUTTON 12  // GPIO12 for the button
+#define SERVER_PORT 4443
+
 // Replace with your network credentials
 const char* ssid = "Network";
 const char* password = "qwertyui";
+
+//REVIEW
+String serverAddress;
+bool lastButtonState = HIGH;
+unsigned long lastDebounceTime = 0;
+unsigned long debounceDelay = 50;
 
 WebServer server(80);
 
@@ -38,6 +50,27 @@ void handleCapture() {
   // Return the frame buffer and turn off the flash
   esp_camera_fb_return(fb);
   digitalWrite(FLASH_LED_PIN, LOW);
+}
+
+void sendUltrasonicData() {
+
+}
+
+// REVIEW
+void sendOCRRequest() {
+    HTTPClient http;
+    String url = "http://" + serverAddress + ":" + String(SERVER_PORT) + "/ocr_button";
+    
+    http.begin(url);
+    int httpResponseCode = http.POST("");
+    
+    if (httpResponseCode > 0) {
+        Serial.printf("OCR request sent. Response code: %d\n", httpResponseCode);
+    } else {
+        Serial.printf("Error sending OCR request: %d\n", httpResponseCode);
+    }
+    
+    http.end();
 }
 
 void setup() {
@@ -104,6 +137,10 @@ void setup() {
   }
   Serial.println(" connected");
 
+  // REVIEW
+  serverAddress = WiFi.localIP().toString();
+  pinMode(BUTTON, INPUT_PULLUP);
+
   // Initialize flash pin as output
   pinMode(FLASH_LED_PIN, OUTPUT);
   digitalWrite(FLASH_LED_PIN, LOW); // Make sure flash is off initially
@@ -119,4 +156,21 @@ void setup() {
 
 void loop() {
   server.handleClient();
+  // Button handling with debounce
+    int reading = digitalRead(BUTTON);
+    
+    if (reading != lastButtonState) {
+        lastDebounceTime = millis();
+    }
+    
+    if ((millis() - lastDebounceTime) > debounceDelay) {
+        if (reading == LOW) {  // Button pressed (LOW because of INPUT_PULLUP)
+            sendOCRRequest();
+            while(digitalRead(BUTTON) == LOW) {
+                delay(10);  // Wait for button release
+            }
+        }
+    }
+    
+    lastButtonState = reading;
 }

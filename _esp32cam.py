@@ -1,9 +1,8 @@
-import requests
 import pyttsx3
+import requests
 from PIL import Image
-from io import BytesIO
+
 from ocr import run_ocr
-import os
 
 ESP32_IP = ""
 

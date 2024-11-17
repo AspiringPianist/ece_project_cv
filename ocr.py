@@ -1,9 +1,8 @@
-import argparse
-import time
-from pathlib import Path
 #from gpiozero import Button
-import requests
 import base64
+
+import requests
+
 
 def run_ocr(image_path):
     api_key = 'K84458401488957'

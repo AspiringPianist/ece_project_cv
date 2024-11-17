@@ -1,17 +1,16 @@
-from flask import Flask, request
+import csv
 import logging
+import threading
+import time
+from collections import deque
 from datetime import datetime
-import json
-import socket
+from queue import Queue
+
+import matplotlib.pyplot as plt
 import netifaces
 import numpy as np
 import sounddevice as sd
-import matplotlib.pyplot as plt
-from collections import deque
-import csv
-import threading
-from queue import Queue
-import time
+from flask import Flask, request
 from scipy import signal
 
 # Initialize Flask app

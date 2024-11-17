@@ -1,27 +1,29 @@
-from flask import Flask, request
+import csv
 import logging
+import threading
+import time
+from collections import deque
 from datetime import datetime
+from queue import Queue
 import json
-import socket
+import matplotlib.pyplot as plt
 import netifaces
 import numpy as np
-import sounddevice as sd
-import matplotlib.pyplot as plt
-from collections import deque
-import csv
-import threading
-from queue import Queue
-import time
-from scipy import signal
-import requests
 import pyttsx3
+import requests
+import sounddevice as sd
 from PIL import Image
-from io import BytesIO
-from ocr import run_ocr
-import os
+from flask import Flask, request
+from scipy import signal
 
-ESP32CAM_IP = "192.168.144.225"
-ESP32_IP = "192.168.144.89"
+# ocr option 1: api ocr that uses ml: from ocr import run_ocr
+from google_ocr import run_ocr #ocr option 2: goat gemini ai
+# ocr option 3: paddle ocr (worst case)
+
+#Figuring out IPs ----------------------------------------------------------------------
+ESP32CAM_IP, ESP32_IP = "esp32cam.local", "esp32.local"
+# -------------------------------------------------------------------------------------------------=
+
 last_button_status = None  # Add this outside the function
 
 def capture_and_process_image():
@@ -63,8 +65,8 @@ FREQ_LEFT = 440   # A4 note for left channel
 FREQ_RIGHT = 880  # A5 note for right channel
 
 # Distance to volume mapping parameters
-MAX_DISTANCE = 200  # cm
-MIN_DISTANCE = 10   # cm
+MAX_DISTANCE = 300  # cm
+MIN_DISTANCE = 5   # cm
 
 # Data visualization setup
 MAX_POINTS = 100
@@ -75,6 +77,62 @@ timestamps = deque(maxlen=MAX_POINTS)
 # Global flags and data queue
 audio_enabled = True
 data_queue = Queue()
+# class StereoToneGenerator:
+#     def __init__(self):
+#         self.stream = sd.OutputStream(
+#             channels=2,
+#             samplerate=SAMPLE_RATE,
+#             blocksize=BLOCK_SIZE,
+#             callback=self.audio_callback
+#         )
+#         self.volume_left = 0
+#         self.volume_right = 0
+#         self.last_update = time.time()
+        
+#         # Enhanced frequency separation for better directionality
+#         self.left_phase = 0
+#         self.right_phase = 0
+#         self.left_freq = 1200  # Higher frequency for left
+#         self.right_freq = 300  # Lower frequency for right
+        
+#     def start(self):
+#         if not self.stream.active:
+#             self.stream.start()
+        
+#     def stop(self):
+#         if self.stream.active:
+#             self.stream.stop()
+        
+#     def _distance_to_volume(self, distance):
+#         if distance < MIN_DISTANCE or distance > MAX_DISTANCE:
+#             return 0
+#         # Sharper volume curve for better distance perception
+#         volume = np.exp(-(distance - MIN_DISTANCE) / (MAX_DISTANCE/2.5))
+#         return np.clip(volume, 0, 1)  # Increased max volume for clearer cues
+        
+#     def update_volumes(self, left_dist, right_dist):
+#         # Enhanced channel separation
+#         self.volume_right = self._distance_to_volume(left_dist)
+#         self.volume_left = self._distance_to_volume(right_dist)
+#         self.last_update = time.time()
+        
+#     def audio_callback(self, outdata, frames, time_info, status):
+#         t = np.arange(frames) / SAMPLE_RATE
+        
+#         # Generate tones with enhanced harmonic content
+#         left_tone = 0.7 * np.sin(2 * np.pi * self.left_freq * t + self.left_phase) + \
+#                    0.3 * np.sin(4 * np.pi * self.left_freq * t + self.left_phase)
+#         right_tone = 0.7 * np.sin(2 * np.pi * self.right_freq * t + self.right_phase) + \
+#                     0.3 * np.sin(4 * np.pi * self.right_freq * t + self.right_phase)
+        
+#         # Update phases
+#         self.left_phase += 2 * np.pi * self.left_freq * frames / SAMPLE_RATE
+#         self.right_phase += 2 * np.pi * self.right_freq * frames / SAMPLE_RATE
+        
+#         # Apply volume with enhanced stereo separation
+#         outdata[:, 1] = left_tone * self.volume_left
+#         outdata[:, 0] = right_tone * self.volume_right
+
 
 class StereoToneGenerator:
     def __init__(self):
@@ -145,9 +203,10 @@ class StereoToneGenerator:
         )
         
         # Apply volume
-        outdata[:, 0] = left_filtered * self.volume_left
-        outdata[:, 1] = right_filtered * self.volume_right# Initialize audio generator
+        outdata[:, 1] = left_filtered * self.volume_left
+        outdata[:, 0] = right_filtered * self.volume_right# Initialize audio generator
 tone_gen = StereoToneGenerator()
+tone_gen.start()
 
 # Configure logging
 logging.basicConfig(
@@ -173,34 +232,78 @@ def save_to_csv(timestamp, left_dist, right_dist):
         writer = csv.writer(f)
         writer.writerow([timestamp, left_dist, right_dist])
 
-def update_plot():
-    plt.clf()
-    plt.plot(list(timestamps), list(distances_left), label='Left Sensor', color='blue')
-    plt.plot(list(timestamps), list(distances_right), label='Right Sensor', color='red')
-    plt.xlabel('Time')
-    plt.ylabel('Distance (cm)')
-    plt.title('Stereo Ultrasonic Sensor Data')
-    plt.legend()
-    plt.grid(True)
-    plt.pause(0.01)
+# def update_plot():
+#     plt.clf()
+#     plt.plot(list(timestamps), list(distances_left), label='Left Sensor', color='blue')
+#     plt.plot(list(timestamps), list(distances_right), label='Right Sensor', color='red')
+#     plt.xlabel('Time')
+#     plt.ylabel('Distance (cm)')
+#     plt.title('Stereo Ultrasonic Sensor Data')
+#     plt.legend()
+#     plt.grid(True)
+#     plt.pause(0.01)  # Increase pause time from 0.01 to 0.1
 
-def visualization_thread():
-    plt.ion()  # Enable interactive mode
+
+# def visualization_thread():
+#     plt.ion()
+#     update_counter = 0
+#     while True:
+#         if not data_queue.empty():
+#             data = data_queue.get()
+#             distances_left.append(int(data['left']))
+#             distances_right.append(int(data['right']))
+#             timestamps.append(data['timestamp'])
+#             update_counter += 1
+#             if update_counter >= 5:  # Update every 5 data points
+#                 update_plot()
+#                 update_counter = 0
+#         time.sleep(0.1)
+
+
+def poll_sensor_data():
     while True:
-        if not data_queue.empty():
-            data = data_queue.get()
-            distances_left.append(int(data['left']))
-            distances_right.append(int(data['right']))
-            timestamps.append(data['timestamp'])
-            update_plot()
-        time.sleep(0.1)
-
+        try:
+            # Get sensor data from ESP32
+            response = requests.get(f"http://{ESP32_IP}/getSensorData")
+            sensor_data = response.json()
+            print(sensor_data)
+            # Extract distance values from JSON response
+            left_distance = float(sensor_data['left'])
+            right_distance = float(sensor_data['right'])
+            
+            # Create timestamp
+            timestamp = datetime.now().strftime("%H:%M:%S")
+            
+            # Update audio if enabled
+            if audio_enabled:
+                tone_gen.update_volumes(left_distance, right_distance)
+            
+            # Add data to visualization queue
+            data_queue.put({
+                'timestamp': timestamp,
+                'left': left_distance,
+                'right': right_distance
+            })
+            
+            # Save to CSV
+            save_to_csv(timestamp, left_distance, right_distance)
+            
+            # Log the received data
+            #logging.info(f"Received - Left: {left_distance}cm, Right: {right_distance}cm")
+            
+        except Exception as e:
+            logging.error(f"Error polling sensor data: {str(e)}")
+            
 @app.route('/', methods=['POST'])
 def receive_data():
     try:
-        # Get distance values from POST request
-        left_distance = float(request.form.get('left', 0))
-        right_distance = float(request.form.get('right', 0))
+        # Get data from request body
+        data = request.get_data().decode('utf-8')
+        sensor_data = json.loads(data)
+        
+        # Extract distance values
+        left_distance = float(sensor_data['left'])
+        right_distance = float(sensor_data['right'])
         
         # Create timestamp
         timestamp = datetime.now().strftime("%H:%M:%S")
@@ -212,8 +315,8 @@ def receive_data():
         # Add data to visualization queue
         data_queue.put({
             'timestamp': timestamp,
-            'left': float(left_distance),
-            'right': float(right_distance)
+            'left': left_distance,
+            'right': right_distance
         })
         
         # Save to CSV
@@ -221,7 +324,7 @@ def receive_data():
         
         # Log the received data
         logging.info(f"Received - Left: {left_distance}cm, Right: {right_distance}cm")
-        
+        time.sleep(1)
         return "Data received successfully", 200
     
     except Exception as e:
@@ -270,10 +373,14 @@ def check_button_status():
 
 if __name__ == '__main__':
     # Start visualization thread
-    viz_thread = threading.Thread(target=visualization_thread, daemon=True)
-    viz_thread.start()
+    #viz_thread = threading.Thread(target=visualization_thread, daemon=True)
+    #viz_thread.start()
     button_thread = threading.Thread(target=check_button_status, daemon=True)
     button_thread.start()
+    # Start sensor polling thread
+    #sensor_thread = threading.Thread(target=poll_sensor_data, daemon=True)
+    #sensor_thread.start()
+
     PORT = 4443
     print("\nServer IP Addresses:")
     print("-" * 50)

@@ -5,7 +5,7 @@ const char* ssid = "Network";       // Replace with your mobile hotspot SSID
 const char* password = "qwertyui";  // Replace with your mobile hotspot password
 
 // Server details
-const char* serverIP = "192.168.63.4";  // Replace with your desktop's IP address
+const char* serverIP = "UNVICTUS.local";  // Replace with your desktop's IP address
 const int serverPort = 4443;            // Ensure this matches your Python server
 
 // Ultrasonic sensor pins

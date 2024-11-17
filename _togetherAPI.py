@@ -1,7 +1,8 @@
-from together import Together
 import base64
+
 import requests
 from PIL import Image
+from together import Together
 
 client = Together(api_key="f79744841a9d211621a12f924b810dab2a71a48375b78a094372fb9ae3c9fbe6")
 

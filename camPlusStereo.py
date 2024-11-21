@@ -378,8 +378,8 @@ if __name__ == '__main__':
     button_thread = threading.Thread(target=check_button_status, daemon=True)
     button_thread.start()
     # Start sensor polling thread
-    #sensor_thread = threading.Thread(target=poll_sensor_data, daemon=True)
-    #sensor_thread.start()
+    sensor_thread = threading.Thread(target=poll_sensor_data, daemon=True)
+    sensor_thread.start()
 
     PORT = 4443
     print("\nServer IP Addresses:")
